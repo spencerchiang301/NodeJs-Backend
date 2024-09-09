@@ -34,7 +34,6 @@ const handleRoutes = (req, res) => {
                         data: { name: 'Spencer', role: 'Backend Developer' }
                     }));
                     break;
-
                 default:
                     res.writeHead(404);
                     res.end(JSON.stringify({ message: 'Route not found' }));
