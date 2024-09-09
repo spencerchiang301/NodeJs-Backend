@@ -6,8 +6,9 @@ async function handleLogin(body, res) {
         // Parse the body to get username and password
         const { email, password } = JSON.parse(body);
 
-        const queryString = `SELECT count(*) as count FROM users WHERE email = \'${email}\'
+        const queryString = `SELECT id, name, email FROM users WHERE email = \'${email}\'
 AND password = \'${password}\'`;
+
         console.log(queryString);
 
         // Execute the query using the selectData function from db/myconn.js
@@ -16,12 +17,17 @@ AND password = \'${password}\'`;
         console.log(result);
 
         // Check if any matching user is found
-        if (result[0].count > 0) {
-            res.writeHead(200);
-            res.end(JSON.stringify({ message: 'Login successful', status: 'success' }));
+        if (result.length > 0) {
+            const user = result[0];
+            console.log('User found:', user);
+
+            // Respond with a success message and user details
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Login successful', user }));
         } else {
-            res.writeHead(401);
-            res.end(JSON.stringify({ message: 'Invalid credentials', status: 'fail' }));
+            // Respond with an error message if no user is found
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Invalid email or password' }));
         }
     } catch (error) {
         // Handle errors (e.g., JSON parse error or DB query error)
@@ -33,24 +39,32 @@ AND password = \'${password}\'`;
 async function handleRegister(body, res) {
     try {
         // Parse the body to get username and password
-        const { username, password, email } = JSON.parse(body);
+        const { name, email, password } = JSON.parse(body);
         const currentTimeInMilliseconds = Date.now();
 
-        const insertString = `Insert into users(name, password, email, created_at) value(\'${username}\',
+        const queryString = `Select count(*) as count from users where email=\'${email}\';`
+        const result = await selectData(queryString);
+
+        if (result[0].count > 1) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'The email had registered!!!'}));
+        }else {
+            const insertString = `Insert into users(name, password, email, created_at) value(\'${name}\',
     \'${password}\',\'${email}\',\'${currentTimeInMilliseconds}\');`;
 
-        console.log(insertString);
+            console.log(insertString);
 
-        // Check if any matching user is found
-        insertUpdateDeleteData(insertString)
-            .then(result => {
-                res.writeHead(200);
-                res.end('New user registered successfully with timestamp!');
-            })
-            .catch(err => {
-                res.writeHead(401);
-                res.end('Error during registration:', err);
-            });
+            // Check if any matching user is found
+            insertUpdateDeleteData(insertString)
+                .then(result => {
+                    res.writeHead(200);
+                    res.end(JSON.stringify({ message: 'Register successful'}));
+                })
+                .catch(err => {
+                    res.writeHead(401);
+                    res.end('Error during registration:', err);
+                });
+        }
     } catch (error) {
         // Handle errors (e.g., JSON parse error or DB query error)
         res.writeHead(500);
