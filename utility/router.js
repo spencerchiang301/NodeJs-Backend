@@ -1,6 +1,8 @@
 const { handleLogin, handleRegister } = require('../utility/handleAuth');
 const {handlePassword} = require("./handleAuth");
-const {handleFileUpload, handleImageUpload} = require("./handleFile"); // Import login handler
+const {handleFileUpload, handleImageUpload, handleImageAndThumbnail} = require("./handleFile");
+const {raw} = require("mysql2");
+const handleGmail = require("./handleMail"); // Import login handler
 
 // Routing logic for handling different routes
 const handleRoutes = (req, res) => {
@@ -82,8 +84,22 @@ const handleRoutes = (req, res) => {
                 });
             }else if(url === '/upload') {
                 handleFileUpload(req, res);
-            }else if(url === '/uploadImage'){
+            }else if(url === '/uploadImage') {
                 handleImageUpload(req, res);
+            }else if(url === '/uploadImageThumbnail') {
+                handleImageAndThumbnail(req, res);
+            }else if(url === '/sendMail') {
+                let body = '';
+
+                // Listen for incoming data
+                req.on('data', chunk => {
+                    body += chunk.toString();
+                });
+
+                // When all data is received
+                req.on('end', async () => {
+                    await handleGmail(body, res);
+                });
             } else {
                 res.writeHead(404);
                 res.end(JSON.stringify({ message: 'Route not found' }));
