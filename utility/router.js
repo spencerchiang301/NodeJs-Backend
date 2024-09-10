@@ -1,5 +1,6 @@
 const { handleLogin, handleRegister } = require('../utility/handleAuth');
-const {handlePassword} = require("./handleAuth"); // Import login handler
+const {handlePassword} = require("./handleAuth");
+const {handleFileUpload, handleImageUpload} = require("./handleFile"); // Import login handler
 
 // Routing logic for handling different routes
 const handleRoutes = (req, res) => {
@@ -79,6 +80,10 @@ const handleRoutes = (req, res) => {
                 req.on('end', async () => {
                     await handlePassword(body, res);
                 });
+            }else if(url === '/upload') {
+                handleFileUpload(req, res);
+            }else if(url === '/uploadImage'){
+                handleImageUpload(req, res);
             } else {
                 res.writeHead(404);
                 res.end(JSON.stringify({ message: 'Route not found' }));
