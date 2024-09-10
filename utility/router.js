@@ -3,6 +3,7 @@ const {handlePassword} = require("./handleAuth");
 const {handleFileUpload, handleImageUpload} = require("./handleFile");
 const handleGmail = require("./handleMail");
 const {mongoFindData, mongoInsertData} = require("../db/mongo/mongoConn");
+const connectRabbitMQ = require("../messaging/handleRabbitmq");
 
 // Routing logic for handling different routes
 const handleRoutes = async (req, res) => {
@@ -34,6 +35,9 @@ const handleRoutes = async (req, res) => {
                     break;
                 case '/mongo/insertData':
                     await mongoInsertData(req, res);
+                    break;
+                case '/rabbit':
+                    await connectRabbitMQ(req, res);
                     break;
                 default:
                     res.writeHead(404);

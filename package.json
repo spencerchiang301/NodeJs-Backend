@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "amqplib": "^0.10.4",
     "formidable": "^3.5.1",
     "ini": "^5.0.0",
     "mongo": "^0.1.0",
