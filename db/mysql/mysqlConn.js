@@ -1,4 +1,4 @@
-const myConnection = require('./db');
+const myConnection = require('./mysqldb');
 
 async function selectData(queryString) {
     return new Promise((resolve, reject) => {
