@@ -6,7 +6,7 @@ It suppor these functions:
 3. messaging module: handel all operation for rabbitmq server
 4. HandelFile module:  Upload file with multi extension like jpg, pdf, csv ..
 5. HandleAuth module:  Using for login, register a new user, reset password.
-6. HaneleMaile module: Send the email to recipient based on the google gmail service.
+6. HaneleMail module: Send the email to recipient based on the google gmail service.
 
 How to use: 
 1. using docker to implement mysql, mongodb, rabbitmq container
@@ -23,7 +23,7 @@ How to use:
 3. 訊息模組：處理rabbitmq伺服器的所有操作
 4. HandelFile模組：上傳具有多種副檔名的文件，如jpg、pdf、csv ..
 5. HandleAuth模組：用於登入、註冊新使用者、重設密碼。
-6. HaneleMaile模組：基於google gmail服務將電子郵件傳送給收件者。
+6. HaneleMail模組：基於google gmail服務將電子郵件傳送給收件者。
 
 使用方法：
 1. 使用docker實作mysql、mongodb、rabbitmq容器
