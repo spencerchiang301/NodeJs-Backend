@@ -1,6 +1,6 @@
 const myRabbitMQConnection = require('./rabbitmq');
 
-async function sendMessageToRabbitMQ(req, res) {
+async function sendMessageToQueue(req, res) {
     if (req.method === 'POST') {
         let body = '';
         req.on('data', chunk => {
@@ -10,7 +10,8 @@ async function sendMessageToRabbitMQ(req, res) {
         req.on('end', async () => {
             const parsedBody = JSON.parse(body); // Parse the incoming data
 
-            const message = parsedBody.message || 'No thing coming from the client'; // Get the message from the body
+            const message = parsedBody.message || 'No thing coming from the client';
+            const queue = parsedBody.queue || 'testQueue'
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
 
@@ -21,9 +22,6 @@ async function sendMessageToRabbitMQ(req, res) {
                 // Create a channel
                 const channel = await connection.createChannel();
 
-                // Declare a queue
-                const queue = 'testQueue';
-
                 // Make sure the queue exists
                 await channel.assertQueue(queue, {
                     durable: false // This means the queue won't survive a server restart
@@ -31,7 +29,7 @@ async function sendMessageToRabbitMQ(req, res) {
 
                 // Send the message from the POST request to the queue
                 channel.sendToQueue(queue, Buffer.from(message));
-                console.log(`[x] Sent: ${message}`);
+                console.log(`Sent: ${message}`);
 
                 res.end(JSON.stringify({ message: 'Message sent to RabbitMQ', sentMessage: message }));
             } catch (error) {
@@ -48,19 +46,19 @@ async function sendMessageToRabbitMQ(req, res) {
     }
 }
 
-async function readMessageFromRabbitMQ(req, res) {
+async function readMessageFromQueue(req, res) {
     if (req.method === 'POST') {
         let body = '';
         req.on('data', chunk => {
             body += chunk.toString(); // Convert Buffer to string
         });
 
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+
         req.on('end', async () => {
             try {
                 const parsedBody = JSON.parse(body); // Parse the incoming JSON body
                 const queue = parsedBody.queue || 'testQueue'; // Get the queue name from the body
-
-                res.writeHead(200, { 'Content-Type': 'application/json' });
 
                 // Connection string to RabbitMQ (assuming it's handled in myRabbitMQConnection)
                 const connection = await myRabbitMQConnection;
@@ -79,7 +77,7 @@ async function readMessageFromRabbitMQ(req, res) {
                 await channel.consume(queue, (msg) => {
                     if (msg !== null) {
                         const message = msg.content.toString();
-                        console.log(`[x] Received: ${message}`);
+                        console.log(`Received: ${message}`);
                         messages.push(message); // Collect the messages
                         channel.ack(msg); // Acknowledge the message (removes it from the queue)
                     }
@@ -115,9 +113,8 @@ async function readMessageFromRabbitMQ(req, res) {
     }
 }
 
-module.exports = readMessageFromRabbitMQ;
 
 module.exports = {
-    sendMessageToRabbitMQ,
-    readMessageFromRabbitMQ
+    sendMessageToQueue,
+    readMessageFromQueue,
 };
