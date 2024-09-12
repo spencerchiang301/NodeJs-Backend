@@ -3,8 +3,10 @@ const {handlePassword} = require("./handleAuth");
 const {handleFileUpload, handleImageUpload} = require("./handleFile");
 const handleGmail = require("./handleMail");
 const {mongoFindData, mongoInsertData} = require("../db/mongo/mongoConn");
-const connectRabbitMQ = require("../messaging/rabbitmq/handleRabbitmq");
-const {sendMessageRabbitMQ, sendMessageToRabbitMQ, readMessageFromRabbitMQ} = require("../messaging/rabbitmq/handleRabbitmq");
+const {sendMessageToQueue, readMessageFromQueue} = require("../messaging/rabbitmq/handleQueue");
+const {sendToExchangeRouting, receiveFromExchangeRouting} = require("../messaging/rabbitmq/handleRouting");
+const {receiveTopicExchange2, receiveTopicExchange1, sendToTopicExchange} = require("../messaging/rabbitmq/handleTopic");
+const {sendTopic, receiveTopic} = require("../messaging/kafka/handleTopicKafka");
 
 // Routing logic for handling different routes
 const handleRoutes = async (req, res) => {
@@ -65,11 +67,32 @@ const handleRoutes = async (req, res) => {
                     await handleGmail(req, res);
                     break;
                 case '/rabbit/send':
-                    await sendMessageToRabbitMQ(req, res);
+                    await sendMessageToQueue(req, res);
                     break;
                 case '/rabbit/read':
-                    await readMessageFromRabbitMQ(req, res);
+                    await readMessageFromQueue(req, res);
                     break;
+                case '/rabbit/sendExchange':
+                    await sendToExchangeRouting(req, res);
+                    break
+                case '/rabbit/receiveExchange':
+                    await receiveFromExchangeRouting(req, res);
+                    break
+                case '/rabbit/sendTopicExchange':
+                    await sendToTopicExchange(req, res);
+                    break
+                case '/rabbit/receiveTopicExchange1':
+                    await receiveTopicExchange1(req, res);
+                    break
+                case '/rabbit/receiveTopicExchange2':
+                    await receiveTopicExchange2(req, res);
+                    break
+                case '/kafka/sendTopic':
+                    await sendTopic(req, res);
+                    break
+                case '/kafka/receiveTopic':
+                    await receiveTopic(req, res);
+                    break
                 default:
                     res.writeHead(405);
                     res.end(JSON.stringify({message: 'Method not allowed'}));
